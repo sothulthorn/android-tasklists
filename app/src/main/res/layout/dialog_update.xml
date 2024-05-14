@@ -7,14 +7,45 @@
     android:padding="10dp"
     >
 
+    <TextView
+        android:id="@+id/app_title"
+        android:text="Update Task"
+        android:textSize="25sp"
+        android:textColor="@color/blue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="start"
+        android:textStyle="bold"
+        android:drawablePadding="8dp" />
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/edit_text"
-        android:hint="Enter Text"
+        android:hint="Update your Task"
         android:padding="12dp"
-        android:lines="4"
-        android:gravity="center"/>
+        android:lines="2" />
+
+    <EditText
+        android:id="@+id/edit_update_pick_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pick the Date"
+        android:lines="2"
+        android:padding="12dp"/>
+
+    <EditText
+        android:id="@+id/edit_update_selected_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Select the Time"
+        android:lines="2"
+        android:padding="12dp"/>
+
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
