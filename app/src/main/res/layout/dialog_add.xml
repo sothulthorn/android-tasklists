@@ -7,14 +7,43 @@
     android:padding="10dp"
     >
 
+    <TextView
+        android:id="@+id/app_title"
+        android:text="Create Task"
+        android:textSize="25sp"
+        android:textColor="@color/blue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="start"
+        android:textStyle="bold"
+        android:drawablePadding="8dp" />
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/edit_add_text"
-        android:hint="Enter Your TODO Task"
+        android:hint="Write Your Task Here"
         android:padding="12dp"
-        android:lines="4"
-        android:gravity="center"/>
+        android:lines="2"/>
+
+    <EditText
+        android:id="@+id/edit_pick_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pick the Date"
+        android:lines="2"
+        android:padding="12dp"/>
+
+    <EditText
+        android:id="@+id/edit_selected_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Select the Time"
+        android:lines="2"
+        android:padding="12dp"/>
 
     <Button
         android:layout_width="match_parent"

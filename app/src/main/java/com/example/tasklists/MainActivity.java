@@ -5,25 +5,35 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     EditText editAddTask;
     Button btnAddTask;
+
+    EditText editPickDate;
+    EditText editSelectTime;
 
     RecyclerView recyclerView;
 
@@ -36,6 +46,23 @@ public class MainActivity extends AppCompatActivity {
     MainAdapter mainAdapter;
 
     AlertDialog.Builder builder;
+
+    private String formatTime(int hourOfDay, int minute) {
+        String timeFormat;
+        if (hourOfDay == 0) {
+            hourOfDay += 12;
+            timeFormat = "AM";
+        } else if (hourOfDay == 12) {
+            timeFormat = "PM";
+        } else if (hourOfDay > 12) {
+            hourOfDay -= 12;
+            timeFormat = "PM";
+        } else {
+            timeFormat = "AM";
+        }
+
+        return String.format(Locale.getDefault(), "%d:%02d %s", hourOfDay, minute, timeFormat);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +115,65 @@ public class MainActivity extends AppCompatActivity {
                 editAddTask = dialog.findViewById(R.id.edit_add_text);
                 btnAddTask = dialog.findViewById(R.id.btn_add_task);
 
+                editPickDate = dialog.findViewById(R.id.edit_pick_date);
+                editSelectTime = dialog.findViewById(R.id.edit_selected_time);
+
+                // Pick Date
+                editPickDate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final Calendar calendar = Calendar.getInstance();
+                        int year = calendar.get(Calendar.YEAR);
+                        int month = calendar.get(Calendar.MONTH);
+                        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+                        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                                MainActivity.this,
+                                new DatePickerDialog.OnDateSetListener() {
+                                    @Override
+                                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                                        // Format selected date
+                                        Calendar selectedDateCalendar = Calendar.getInstance();
+                                        selectedDateCalendar.set(year, month, dayOfMonth);
+                                        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd yyyy", Locale.US);
+                                        String selectedDate = sdf.format(selectedDateCalendar.getTime());
+                                        editPickDate.setText(selectedDate);
+                                    }
+                                },
+                                year, month, dayOfMonth);
+
+                        datePickerDialog.show();
+                    }
+                });
+
+                // Select Time
+                editSelectTime = dialog.findViewById(R.id.edit_selected_time);
+                editSelectTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Get current time
+                        final Calendar calendar = Calendar.getInstance();
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int minute = calendar.get(Calendar.MINUTE);
+
+                        // Create a TimePickerDialog
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                                MainActivity.this,
+                                new TimePickerDialog.OnTimeSetListener() {
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                        // Format selected time
+                                        String selectedTime = formatTime(hourOfDay, minute);
+                                        editSelectTime.setText(selectedTime);
+                                    }
+                                },
+                                hour, minute, false); // false for AM/PM format
+
+                        // Show the TimePickerDialog
+                        timePickerDialog.show();
+                    }
+                });
+
                 btnAddTask.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -123,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
                                             dialog.cancel();
                                         }
                                     });
+
                             // Creating dialog box
                             AlertDialog alert = builder.create();
 
