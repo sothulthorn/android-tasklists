@@ -6,33 +6,30 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import android.content.Context;
 
-@Database(entities = {MainData.class},version = 1,exportSchema = false)
+@Database(entities = { MainData.class }, version = 1, exportSchema = false)
 
 public abstract class RoomDB extends RoomDatabase {
-    //cretae atabse instance
-
-    private static RoomDB databse;
+    //create database instance
+    private static RoomDB database;
 
     //define db name
-
     private static String DATABASE_NAME="database";
 
     public  synchronized static RoomDB getInstance(Context context){
-        if(databse==null){
+        if(database == null){
             //when db is null
-            //initialize dab
-            databse= Room.databaseBuilder(context.getApplicationContext(),RoomDB.class,DATABASE_NAME)
+            //initialize db
+            database= Room.databaseBuilder(context.getApplicationContext(),RoomDB.class,DATABASE_NAME)
                     .allowMainThreadQueries()
                     .fallbackToDestructiveMigration()
                     .build();
         }
 
         //return db
-        return databse;
+        return database;
     }
 
     //create Dao
 
     public abstract MainDao mainDao();
-
 }

@@ -43,7 +43,6 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
         View view= LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_row_main,parent,false);
 
-
         return new ViewHolder(view);
     }
 
@@ -57,18 +56,22 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
         // Set text in textview
         holder.textView.setText(data.getText());
+        holder.dateView.setText(data.getDate());
+        holder.timeView.setText(data.getTime());
 
         holder.btEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Init main data
-                MainData d = dataList.get(holder.getAdapterPosition());
+                MainData data = dataList.get(holder.getAdapterPosition());
 
                 // Get id
-                int sID = d.getID();
+                int sID = data.getID();
 
                 // Get text
-                String sText = d.getText();
+                String taskText = data.getText();
+                String dateText = data.getDate();
+                String timeText = data.getTime();
 
                 // Create dialog
                 Dialog dialog = new Dialog(context);
@@ -83,17 +86,21 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
                 int height = WindowManager.LayoutParams.WRAP_CONTENT;
 
                 // Set layout
-                dialog.getWindow().setLayout(width,height);
+                dialog.getWindow().setLayout(width, height);
 
                 // Show dialog
                 dialog.show();
 
                 // Init and assign variable
                 EditText editText = dialog.findViewById(R.id.edit_text);
+                EditText editDate = dialog.findViewById(R.id.text_date);
+                EditText editTime = dialog.findViewById(R.id.text_time);
                 Button btUpdate = dialog.findViewById(R.id.bt_update);
 
                 // Set text on edit text
-                editText.setText(sText);
+                editText.setText(taskText);
+                editDate.setText(dateText);
+                editTime.setText(timeText);
 
                 btUpdate.setOnClickListener(new View.OnClickListener() {
                     @SuppressLint("NotifyDataSetChanged")
@@ -103,10 +110,12 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
                         dialog.dismiss();
 
                         // Get update text from edit text
-                        String uText=editText.getText().toString().trim();
+                        String uText = editText.getText().toString().trim();
+                        String updateDateText = editDate.getText().toString().trim();
+                        String updateTimeText = editTime.getText().toString().trim();
 
                         // Update text in db
-                        database.mainDao().upate(sID,uText);
+                        database.mainDao().update(sID, uText, updateDateText, updateTimeText);
 
                         // Notify when data is updated
                         dataList.clear();
@@ -162,13 +171,16 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // Init variables
-        TextView textView;
+        TextView textView, dateView, timeView;
         ImageView btEdit,btDelete;
 
         public ViewHolder(@NonNull  View itemView) {
             super(itemView);
             // Assign variable
             textView = itemView.findViewById(R.id.text_view);
+            dateView = itemView.findViewById(R.id.text_date);
+            timeView = itemView.findViewById(R.id.text_time);
+
             btEdit = itemView.findViewById(R.id.bt_edit);
             btDelete = itemView.findViewById(R.id.bt_delete);
         }

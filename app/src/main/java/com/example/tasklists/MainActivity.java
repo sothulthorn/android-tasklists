@@ -181,12 +181,17 @@ public class MainActivity extends AppCompatActivity {
 
                         // Get string from edit text
                         String taskText = editAddTask.getText().toString().trim();
-                        if (!taskText.equals("")) {
+                        String dateText = editPickDate.getText().toString().trim();
+                        String timeText = editSelectTime.getText().toString().trim();
+
+                        if (!taskText.equals("") && !dateText.equals("") && !timeText.equals("")) {
                             // Init main data
                             MainData data = new MainData();
 
                             // Set text on main data
                             data.setText(taskText);
+                            data.setDate(dateText);
+                            data.setTime(timeText);
 
                             // Insert text in database
                             database.mainDao().insert(data);
