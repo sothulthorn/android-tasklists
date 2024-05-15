@@ -3,21 +3,29 @@ package com.example.tasklists;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
    //initialize variables
@@ -26,6 +34,23 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
     private  RoomDB database;
 
     AlertDialog.Builder builder;
+
+    private String formatTime(int hourOfDay, int minute) {
+        String timeFormat;
+        if (hourOfDay == 0) {
+            hourOfDay += 12;
+            timeFormat = "AM";
+        } else if (hourOfDay == 12) {
+            timeFormat = "PM";
+        } else if (hourOfDay > 12) {
+            hourOfDay -= 12;
+            timeFormat = "PM";
+        } else {
+            timeFormat = "AM";
+        }
+
+        return String.format(Locale.getDefault(), "%d:%02d %s", hourOfDay, minute, timeFormat);
+    }
 
     //create constructor
     @SuppressLint("NotifyDataSetChanged")
@@ -67,6 +92,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
                 // Get id
                 int sID = data.getID();
+                Log.d("MainAdapter", "ID: " + sID);
 
                 // Get text
                 String taskText = data.getText();
@@ -93,14 +119,69 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
                 // Init and assign variable
                 EditText editText = dialog.findViewById(R.id.edit_text);
-                EditText editDate = dialog.findViewById(R.id.text_date);
-                EditText editTime = dialog.findViewById(R.id.text_time);
+                EditText editPickDate = dialog.findViewById(R.id.edit_update_pick_date);
+                EditText editSelectedTime = dialog.findViewById(R.id.edit_update_selected_time);
                 Button btUpdate = dialog.findViewById(R.id.bt_update);
 
                 // Set text on edit text
                 editText.setText(taskText);
-                editDate.setText(dateText);
-                editTime.setText(timeText);
+                editPickDate.setText(dateText);
+                editSelectedTime.setText(timeText);
+
+                // Pick Date
+                editPickDate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final Calendar calendar = Calendar.getInstance();
+                        int year = calendar.get(Calendar.YEAR);
+                        int month = calendar.get(Calendar.MONTH);
+                        int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+
+                        DatePickerDialog datePickerDialog = new DatePickerDialog(
+                                context,
+                                new DatePickerDialog.OnDateSetListener() {
+                                    @Override
+                                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                                        // Format selected date
+                                        Calendar selectedDateCalendar = Calendar.getInstance();
+                                        selectedDateCalendar.set(year, month, dayOfMonth);
+                                        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd yyyy", Locale.US);
+                                        String selectedDate = sdf.format(selectedDateCalendar.getTime());
+                                        editPickDate.setText(selectedDate);
+                                    }
+                                },
+                                year, month, dayOfMonth);
+
+                        datePickerDialog.show();
+                    }
+                });
+
+                //select time
+                editSelectedTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Get current time
+                        final Calendar calendar = Calendar.getInstance();
+                        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                        int minute = calendar.get(Calendar.MINUTE);
+
+                        // Create a TimePickerDialog
+                        TimePickerDialog timePickerDialog = new TimePickerDialog(
+                                context,
+                                new TimePickerDialog.OnTimeSetListener() {
+                                    @Override
+                                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                                        // Format selected time
+                                        String selectedTime = formatTime(hourOfDay, minute);
+                                        editSelectedTime.setText(selectedTime);
+                                    }
+                                },
+                                hour, minute, false); // false for AM/PM format
+
+                        // Show the TimePickerDialog
+                        timePickerDialog.show();
+                    }
+                });
 
                 btUpdate.setOnClickListener(new View.OnClickListener() {
                     @SuppressLint("NotifyDataSetChanged")
@@ -110,17 +191,37 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
                         dialog.dismiss();
 
                         // Get update text from edit text
-                        String uText = editText.getText().toString().trim();
-                        String updateDateText = editDate.getText().toString().trim();
-                        String updateTimeText = editTime.getText().toString().trim();
+                        String updateText = editText.getText().toString().trim();
+                        String updateDateText = editPickDate.getText().toString().trim();
+                        String updateTimeText = editSelectedTime.getText().toString().trim();
 
-                        // Update text in db
-                        database.mainDao().update(sID, uText, updateDateText, updateTimeText);
+                        if (!updateText.equals("") && !updateDateText.equals("") && !updateTimeText.equals("")) {
+                            // Update text in db
+                            database.mainDao().update(sID, updateText, updateDateText, updateTimeText);
 
-                        // Notify when data is updated
-                        dataList.clear();
-                        dataList.addAll(database.mainDao().getAll());
-                        notifyDataSetChanged();
+                            // Notify when data is updated
+                            dataList.clear();
+                            dataList.addAll(database.mainDao().getAll());
+                            notifyDataSetChanged();
+                        } else {
+                            builder = new AlertDialog.Builder(context);
+
+                            // Setting message manually and performing action on button click
+                            builder.setMessage("The text field must not be empty!!")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    });
+
+                            // Creating dialog box
+                            AlertDialog alert = builder.create();
+
+                            // Setting the title manually
+                            alert.setTitle("Invalid");
+                            alert.show();
+                        }
                     }
                 });
             }
